@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>University events</title>
+
+    <!-- Global CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body class="fade-in">
+
+    <!-- ===== NAVIGATION BAR ===== -->
+    <div class="navbar">
+        <a href="/">Home</a>
+        <a href="/login">Student Login</a>
+        <a href="/register">Register</a>
+        <a href="/admin_dashboard">Admin</a>
+    </div>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <h1>University events</h1>
+
+    <p style="font-size:18px; margin-top:10px;">
+        Your University’s Unified Event Platform
+    </p>
+
+    <p style="max-width:600px; margin:20px auto; line-height:1.6;">
+        Discover cultural, sports, and technical events happening across the campus.
+        Participate, connect, and showcase your talent through a seamless digital experience.
+    </p>
+
+    <!-- ===== FEATURE CARDS ===== -->
+    <div class="stats">
+
+        <div class="card">
+            <h3>🎭 Cultural Events</h3>
+            <p>
+                Freshers, fests, celebrations, and university activities.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>🏆 Sports Events</h3>
+            <p>
+                Competitions, selections, tournaments, and athletic programs.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>💻 Tech Events</h3>
+            <p>
+                Hackathons, workshops, expos, conferences, and expert sessions.
+            </p>
+        </div>
+
+    </div>
+
+    
+
+</body>
+</html>

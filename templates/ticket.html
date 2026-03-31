@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Event Ticket</title>
+
+    <!-- Global CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body class="fade-in">
+
+    <!-- ===== NAVIGATION BAR ===== -->
+    <div class="navbar">
+        <a href="/">Home</a>
+        <a href="/student_dashboard">Dashboard</a>
+        <a href="/events">Events</a>
+        <a href="/logout">Logout</a>
+    </div>
+
+    <h2>🎟 Ticket Generated Successfully</h2>
+
+    <!-- ===== TICKET PANEL ===== -->
+    <div class="ticket">
+
+        <h3>{{ event.title }}</h3>
+
+        <p style="color:#cbd5f5;">
+            {{ event.description }}
+        </p>
+
+        <hr style="margin:10px;">
+
+        <p>
+            <b>Student:</b> {{ session.student_name }}
+        </p>
+
+        <p>
+            <b>Enrollment:</b> {{ session.student_id }}
+        </p>
+
+        <p style="font-size:18px; font-weight:bold; color:#facc15;">
+            Ticket ID: {{ ticket_id }}
+        </p>
+
+        <p style="font-size:13px; color:#22c55e;">
+            Please present this ticket at the event entrance
+        </p>
+
+        <br>
+
+        <a href="/student_dashboard">
+            <button class="success-btn">
+                Back to Dashboard
+            </button>
+        </a>
+
+    </div>
+
+</body>
+</html>

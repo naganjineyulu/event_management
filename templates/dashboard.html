@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Dashboard</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(120deg, black, white);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: bgMove 6s ease-in-out infinite alternate;
+        }
+
+        @keyframes bgMove {
+            0% { background-position: left; }
+            100% { background-position: right; }
+        }
+
+        .dashboard-box {
+            background: yellow;
+            padding: 40px;
+            width: 420px;
+            text-align: center;
+            border-radius: 14px;
+            box-shadow: 0 18px 35px rgba(0,0,0,0.3);
+            animation: slideFade 1s ease;
+        }
+
+        @keyframes slideFade {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            animation: pop 0.8s ease;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(0.85); }
+            100% { transform: scale(1); }
+        }
+
+        .btn {
+            display: inline-block;
+            margin: 12px;
+            padding: 12px 20px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-3px);
+        }
+
+        .logout {
+            background-color: #e74c3c;
+        }
+
+        .logout:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-box">
+        <h2>Welcome {{ user_name }} you are registered successfully!</h2>
+
+        <a class="btn" href="/events">View Events</a>
+        <a class="btn logout" href="/logout">Logout</a>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment</title>
+
+    <!-- Global CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body class="fade-in">
+
+    <!-- ===== NAVIGATION BAR ===== -->
+    <div class="navbar">
+        <a href="/">Home</a>
+        <a href="/events">Events</a>
+        <a href="/student_dashboard">Dashboard</a>
+        <a href="/logout">Logout</a>
+    </div>
+
+    <h2>Complete Payment</h2>
+
+    <!-- ===== PAYMENT PANEL ===== -->
+    <div class="payment-box">
+
+        <h3>{{ event.title }}</h3>
+
+        <p style="color:#cbd5f5;">
+            {{ event.description }}
+        </p>
+
+        <p style="font-size:20px; font-weight:bold; color:#facc15;">
+            Amount: ₹{{ event.price }}
+        </p>
+
+        <hr style="margin:15px;">
+
+        <!-- PAYMENT METHODS -->
+        <p>Select Payment Method</p>
+
+        <div class="card">
+
+            <p>📱 Pay via UPI</p>
+            <p style="font-size:13px; color:#cbd5f5;">
+                UPI ID: <b>paruluniversity@upi</b>
+            </p>
+
+        </div>
+
+        <div class="card">
+            <p>💳 Debit / Credit Card</p>
+        </div>
+
+        <div class="card">
+            <p>🏦 Net Banking</p>
+        </div>
+
+        <br>
+
+        <!-- PAYMENT BUTTON -->
+        <form method="POST">
+            <button class="success-btn">
+                Payment Successful
+            </button>
+        </form>
+
+    </div>
+
+</body>
+</html>

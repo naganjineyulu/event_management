@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Event</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        .error {
+            color: #f87171;
+            font-size: 12px;
+        }
+
+        .valid {
+            border: 2px solid #22c55e;
+        }
+
+        .invalid {
+            border: 2px solid #ef4444;
+        }
+    </style>
+</head>
+
+<body class="fade-in">
+
+    <div class="admin-header">
+        Add New Event – Unievents
+    </div>
+
+    <div class="navbar">
+        <a href="/admin_dashboard">Dashboard</a>
+        <a href="/add_event">Add Event</a>
+        <a href="/logout">Logout</a>
+    </div>
+
+    <h2>Create Event</h2>
+
+    <form method="POST" onsubmit="return validateForm()">
+
+        <input type="text" id="title" name="title" placeholder="Event Title"><br>
+        <span class="error" id="titleError"></span><br>
+
+        <input type="text" id="description" name="description" placeholder="Description"><br>
+        <span class="error" id="descError"></span><br>
+
+        <input type="text" id="category" name="category" placeholder="Category"><br>
+        <span class="error" id="catError"></span><br>
+
+        <input type="text" id="date" name="date" placeholder="Date"><br>
+        <span class="error" id="dateError"></span><br>
+
+        <input type="number" id="price" name="price" placeholder="Price"><br>
+        <span class="error" id="priceError"></span><br>
+
+        <br>
+
+        <button type="submit" class="success-btn">
+            Add Event
+        </button>
+
+    </form>
+
+    <!-- ===== VALIDATION SCRIPT ===== -->
+    <script>
+        function validateForm() {
+            let valid = true;
+
+            // Clear old errors
+            document.querySelectorAll(".error").forEach(e => e.innerText = "");
+
+            let title = document.getElementById("title");
+            let desc = document.getElementById("description");
+            let cat = document.getElementById("category");
+            let date = document.getElementById("date");
+            let price = document.getElementById("price");
+
+            // TITLE
+            if (title.value.trim() === "") {
+                document.getElementById("titleError").innerText = "Title required";
+                title.classList.add("invalid");
+                valid = false;
+            } else {
+                title.classList.remove("invalid");
+                title.classList.add("valid");
+            }
+
+            // DESCRIPTION
+            if (desc.value.trim().length < 5) {
+                document.getElementById("descError").innerText = "Enter valid description";
+                desc.classList.add("invalid");
+                valid = false;
+            } else {
+                desc.classList.remove("invalid");
+                desc.classList.add("valid");
+            }
+
+            // CATEGORY
+            if (cat.value.trim() === "") {
+                document.getElementById("catError").innerText = "Category required";
+                cat.classList.add("invalid");
+                valid = false;
+            } else {
+                cat.classList.remove("invalid");
+                cat.classList.add("valid");
+            }
+
+            // DATE
+            if (date.value.trim() === "") {
+                document.getElementById("dateError").innerText = "Date required";
+                date.classList.add("invalid");
+                valid = false;
+            } else {
+                date.classList.remove("invalid");
+                date.classList.add("valid");
+            }
+
+            // PRICE
+            if (price.value === "" || price.value < 0) {
+                document.getElementById("priceError").innerText = "Enter valid price";
+                price.classList.add("invalid");
+                valid = false;
+            } else {
+                price.classList.remove("invalid");
+                price.classList.add("valid");
+            }
+
+            return valid;
+        }
+    </script>
+
+</body>
+</html>

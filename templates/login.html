@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Login</title>
+
+    <!-- Global CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body class="fade-in">
+
+    <!-- ===== NAVIGATION BAR ===== -->
+    <div class="navbar">
+        <a href="/">Home</a>
+        <a href="/login">Student Login</a>
+        <a href="/register">Register</a>
+    </div>
+
+    <h2>Student Login</h2>
+
+    <!-- ===== LOGIN FORM ===== -->
+    <form method="POST">
+
+        <!-- IMPORTANT: name must match Flask -->
+        <input type="text"
+               name="enrollment"
+               placeholder="Enrollment Number"
+               required><br>
+
+        <input type="password"
+               name="password"
+               placeholder="Password"
+               required><br>
+
+        <br>
+
+        <button type="submit">
+            Login
+        </button>
+
+    </form>
+
+    <!-- ===== FOOTER / LINKS ===== -->
+    <div style="margin-top:30px;">
+        <p>
+            New student?
+            <a href="/register">Create Account</a>
+        </p>
+    </div>
+
+</body>
+</html>

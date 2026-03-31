@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Events</title>
+
+    <!-- Global CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body class="fade-in">
+
+    <!-- ===== NAVIGATION BAR ===== -->
+    <div class="navbar">
+        <a href="/">Home</a>
+        <a href="/student_dashboard">Dashboard</a>
+        <a href="/events">Events</a>
+        <a href="/logout">Logout</a>
+    </div>
+
+    <h2>Available Events</h2>
+
+    <p style="font-size:16px; margin-top:5px;">
+        Discover and participate in university activities
+    </p>
+
+    <!-- ===== EVENTS LIST ===== -->
+    <div class="stats">
+
+        {% for event in events %}
+            <div class="card">
+
+                <h3>{{ event.title }}</h3>
+
+                <p style="font-size:14px; color:#cbd5f5;">
+                    Category: {{ event.category }}
+                </p>
+
+                <p>
+                    {{ event.description }}
+                </p>
+
+                <p style="font-weight:bold; color:#facc15;">
+                    Price: ₹{{ event.price }}
+                </p>
+
+                <a href="/event/{{ event._id }}">
+                    <button>View Details</button>
+                </a>
+
+            </div>
+        {% endfor %}
+
+    </div>
+
+</body>
+</html>

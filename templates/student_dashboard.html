@@ -1,0 +1,74 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Dashboard</title>
+
+    <!-- Global CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body class="fade-in">
+
+    <!-- ===== NAVIGATION BAR ===== -->
+    <div class="navbar">
+        <a href="/">Home</a>
+        <a href="/events">Events</a>
+        <a href="/account">Account</a>
+        <a href="/logout">Logout</a>
+    </div>
+
+    <!-- ===== WELCOME SECTION ===== -->
+    <h2>Welcome, {{ name }}</h2>
+
+    <p style="margin-top:5px; font-size:16px;">
+        Here’s your activity overview
+    </p>
+
+    <!-- ===== DASHBOARD STATS ===== -->
+    <div class="stats">
+
+        <div class="stat-box">
+            <h3>{{ total }}</h3>
+            <p>Events Participated</p>
+        </div>
+
+        <div class="stat-box">
+            <h3>Active</h3>
+            <p>Account Status</p>
+        </div>
+
+        <div class="stat-box">
+            <h3>Available</h3>
+            <p>Upcoming Events</p>
+        </div>
+
+    </div>
+
+    <!-- ===== QUICK ACTIONS ===== -->
+    <div style="margin-top:30px;">
+
+        <div class="card">
+            <h3>🎯 Explore Events</h3>
+            <p>
+                Browse cultural, sports, and technical events available in the university.
+            </p>
+            <a href="/events">
+                <button>View Events</button>
+            </a>
+        </div>
+
+        <div class="card">
+            <h3>👤 Manage Profile</h3>
+            <p>
+                Update your personal details and academic information.
+            </p>
+            <a href="/account">
+                <button class="success-btn">Account Settings</button>
+            </a>
+        </div>
+
+    </div>
+
+</body>
+</html>

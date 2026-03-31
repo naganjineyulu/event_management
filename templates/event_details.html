@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Event Details</title>
+
+    <!-- Global CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body class="fade-in">
+
+    <!-- ===== NAVIGATION BAR ===== -->
+    <div class="navbar">
+        <a href="/">Home</a>
+        <a href="/events">Events</a>
+        <a href="/student_dashboard">Dashboard</a>
+        <a href="/logout">Logout</a>
+    </div>
+
+    <!-- ===== EVENT DETAILS PANEL ===== -->
+    <div class="card" style="width:420px; margin-top:40px;">
+
+        <h2>{{ event.title }}</h2>
+
+        <p style="color:#cbd5f5; font-size:14px;">
+            Category: {{ event.category }}
+        </p>
+
+        <p style="margin-top:10px;">
+            {{ event.description }}
+        </p>
+
+        <p style="font-size:18px; font-weight:bold; color:#facc15;">
+            Price: ₹{{ event.price }}
+        </p>
+
+        <br>
+
+        <!-- FREE EVENT LOGIC -->
+        {% if event.price == 0 %}
+
+            <p style="color:#22c55e; font-size:14px;">
+                This is a Free Event 🎉
+            </p>
+
+            <a href="/register_event/{{ event._id }}">
+                <button class="success-btn">
+                    Register Now
+                </button>
+            </a>
+
+        {% else %}
+
+            <!-- PAID EVENT LOGIC -->
+
+            <p style="color:#f87171; font-size:14px;">
+                Payment Required 💳
+            </p>
+
+            <a href="/register_event/{{ event._id }}">
+                <button>
+                    Proceed to Payment
+                </button>
+            </a>
+
+        {% endif %}
+
+    </div>
+
+</body>
+</html>

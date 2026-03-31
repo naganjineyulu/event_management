@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        .error {
+            color: #f87171;
+            font-size: 12px;
+        }
+
+        .valid {
+            border: 2px solid #22c55e;
+        }
+
+        .invalid {
+            border: 2px solid #ef4444;
+        }
+    </style>
+</head>
+
+<body class="fade-in">
+
+    <div class="navbar">
+        <a href="/">Home</a>
+        <a href="/login">Login</a>
+        <a href="/register">Register</a>
+    </div>
+
+    <h2>Student Registration</h2>
+
+    <form method="POST" onsubmit="return validateForm()">
+
+        <!-- NAME -->
+        <input type="text" id="name" name="name" placeholder="Full Name"><br>
+        <span class="error" id="nameError"></span><br>
+
+        <!-- MOBILE -->
+        <input type="text" id="mobile" name="mobile" placeholder="Mobile Number"><br>
+        <span class="error" id="mobileError"></span><br>
+
+        <!-- EMAIL -->
+        <input type="email" id="email" name="email" placeholder="University Email"><br>
+        <span class="error" id="emailError"></span><br>
+
+        <!-- ENROLLMENT -->
+        <input type="text" id="enrollment" name="enrollment" placeholder="Enrollment Number"><br>
+        <span class="error" id="enrollmentError"></span><br>
+
+        <!-- PASSWORD -->
+        <input type="password" id="password" name="password" placeholder="Password"><br>
+        <span class="error" id="passwordError"></span><br>
+
+        <br>
+
+        <button type="submit" class="success-btn">Register</button>
+
+    </form>
+
+    <!-- ===== VALIDATION SCRIPT ===== -->
+    <script>
+        function validateForm() {
+            let valid = true;
+
+            document.querySelectorAll(".error").forEach(e => e.innerText = "");
+
+            let name = document.getElementById("name");
+            let mobile = document.getElementById("mobile");
+            let email = document.getElementById("email");
+            let enrollment = document.getElementById("enrollment");
+            let password = document.getElementById("password");
+
+            // NAME
+            if (name.value.trim().length < 3) {
+                document.getElementById("nameError").innerText = "Enter valid name";
+                name.classList.add("invalid");
+                valid = false;
+            } else {
+                name.classList.remove("invalid");
+                name.classList.add("valid");
+            }
+
+            // MOBILE (10 digits)
+            let mobilePattern = /^[0-9]{10}$/;
+            if (!mobilePattern.test(mobile.value)) {
+                document.getElementById("mobileError").innerText = "Enter valid 10-digit mobile number";
+                mobile.classList.add("invalid");
+                valid = false;
+            } else {
+                mobile.classList.remove("invalid");
+                mobile.classList.add("valid");
+            }
+
+            // EMAIL (University only)
+            if (!email.value.endsWith("@paruluniversity.ac.in")) {
+                document.getElementById("emailError").innerText = "Use university email only";
+                email.classList.add("invalid");
+                valid = false;
+            } else {
+                email.classList.remove("invalid");
+                email.classList.add("valid");
+            }
+
+            // ENROLLMENT
+            if (enrollment.value.trim() === "") {
+                document.getElementById("enrollmentError").innerText = "Enrollment required";
+                enrollment.classList.add("invalid");
+                valid = false;
+            } else {
+                enrollment.classList.remove("invalid");
+                enrollment.classList.add("valid");
+            }
+
+            // PASSWORD
+            if (password.value.length < 4) {
+                document.getElementById("passwordError").innerText = "Minimum 4 characters required";
+                password.classList.add("invalid");
+                valid = false;
+            } else {
+                password.classList.remove("invalid");
+                password.classList.add("valid");
+            }
+
+            return valid;
+        }
+    </script>
+
+</body>
+</html>
