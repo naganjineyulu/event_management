@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Admin Registration - Create a new admin account for the event management system">
+    <meta name="keywords" content="admin registration, admin account, event management">
+    <meta name="author" content="Event Management Team">
+    <meta property="og:title" content="Admin Registration | University Event Management">
+    <title>Admin Registration | University Event Management</title>
+
+    <!-- Global CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        .admin-register-container {
+            max-width: 420px;
+            margin: 60px auto;
+            padding: 40px 35px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(20, 20, 30, 0.95) 0%, rgba(40, 40, 60, 0.95) 100%);
+            border: 2px solid #10b981;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7), 0 0 30px rgba(16, 185, 129, 0.2);
+        }
+
+        .admin-register-header {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 35px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .admin-register-header .lock-icon {
+            font-size: 56px;
+            animation: lockPulse 2s infinite;
+            display: inline-block;
+        }
+
+        .admin-register-header h1 {
+            font-size: 32px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin: 0;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        @keyframes lockPulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.12);
+            }
+        }
+
+        .admin-register-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            color: #cbd5f5;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .admin-register-form input {
+            padding: 14px 16px;
+            border: 2px solid #444;
+            border-radius: 8px;
+            background-color: #1a1a2e;
+            color: #fff;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .admin-register-form input:focus {
+            outline: none;
+            border-color: #10b981;
+            background-color: #222233;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.25);
+        }
+
+        .admin-register-form input::placeholder {
+            color: #6b7280;
+        }
+
+        .admin-register-btn {
+            padding: 14px 16px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-top: 10px;
+            box-shadow: 0 5px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .admin-register-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+
+        .admin-register-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .password-strength {
+            margin-top: 8px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            display: none;
+        }
+
+        .password-strength.weak {
+            display: block;
+            background-color: rgba(239, 68, 68, 0.1);
+            border: 1px solid #dc2626;
+            color: #fecaca;
+        }
+
+        .password-strength.medium {
+            display: block;
+            background-color: rgba(249, 115, 22, 0.1);
+            border: 1px solid #ea580c;
+            color: #fed7aa;
+        }
+
+        .password-strength.strong {
+            display: block;
+            background-color: rgba(16, 185, 129, 0.1);
+            border: 1px solid #059669;
+            color: #a7f3d0;
+        }
+
+        .admin-info {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 1px solid #444;
+            color: #cbd5f5;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .admin-info p {
+            margin: 8px 0;
+        }
+
+        .admin-info a {
+            color: #10b981;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .admin-info a:hover {
+            text-decoration: underline;
+            color: #059669;
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+            border: 2px solid #dc2626;
+            color: #fecaca;
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-align: center;
+            display: none;
+            box-shadow: 0 5px 15px rgba(220, 38, 38, 0.2);
+        }
+
+        .error-message.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        .success-message {
+            background: linear-gradient(135deg, #064e3b 0%, #047857 100%);
+            border: 2px solid #10b981;
+            color: #a7f3d0;
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-align: center;
+            display: none;
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.2);
+        }
+
+        .success-message.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, #444 50%, transparent 100%);
+            margin: 20px 0;
+        }
+
+        .security-info {
+            text-align: center;
+            margin-top: 15px;
+            color: #10b981;
+            font-size: 12px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body class="fade-in">
+
+    <!-- ===== NAVIGATION BAR ===== -->
+    <div class="navbar">
+        <a href="/">Home</a>
+        <a href="/login">Student Login</a>
+        <a href="/register">Register</a>
+    </div>
+
+    <!-- ===== ADMIN REGISTRATION CONTAINER ===== -->
+    <div class="admin-register-container">
+
+        <div class="admin-register-header">
+            <div class="lock-icon">🔐</div>
+            <h1>Create Admin Account</h1>
+        </div>
+
+        <!-- Success Message -->
+        <div class="success-message" id="successMessage"></div>
+
+        <!-- Error Message -->
+        <div class="error-message" id="errorMessage"></div>
+
+        <!-- Admin Registration Form -->
+        <form method="POST" class="admin-register-form" onsubmit="return validateAdminRegisterForm()">
+
+            <div class="form-group">
+                <label for="full_name">Full Name</label>
+                <input type="text"
+                       id="full_name"
+                       name="full_name"
+                       placeholder="Enter your full name"
+                       autocomplete="name"
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email"
+                       id="email"
+                       name="email"
+                       placeholder="Enter your email"
+                       autocomplete="email"
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text"
+                       id="username"
+                       name="username"
+                       placeholder="Choose a username (min 3 characters)"
+                       autocomplete="username"
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password"
+                       id="password"
+                       name="password"
+                       placeholder="Choose a strong password (min 6 characters)"
+                       autocomplete="new-password"
+                       oninput="checkPasswordStrength()"
+                       required>
+                <div class="password-strength" id="passwordStrength"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password</label>
+                <input type="password"
+                       id="confirm_password"
+                       name="confirm_password"
+                       placeholder="Re-enter your password"
+                       autocomplete="new-password"
+                       required>
+            </div>
+
+            <button type="submit" class="admin-register-btn">
+                ✓ Create Account
+            </button>
+
+        </form>
+
+        <!-- Divider -->
+        <div class="divider"></div>
+
+        <!-- Admin Info -->
+        <div class="admin-info">
+            <p>👤 <strong>Registration Required</strong></p>
+            <p>Create a secure admin account to manage events.</p>
+            <p>Already have an account? <a href="/admin_login">Login here</a></p>
+        </div>
+
+        <!-- Security Info -->
+        <div class="security-info">
+            🔒 Secure Registration | ✓ Password Encrypted
+        </div>
+
+    </div>
+
+    <!-- ===== VALIDATION SCRIPT ===== -->
+    <script>
+        function checkPasswordStrength() {
+            const password = document.getElementById('password').value;
+            const strength = document.getElementById('passwordStrength');
+
+            if (password.length === 0) {
+                strength.classList.remove('weak', 'medium', 'strong');
+                return;
+            }
+
+            // Check password strength
+            let strengthLevel = 'weak';
+            let strengthText = '❌ Weak - Add uppercase, numbers, or symbols';
+
+            if (password.length >= 8) {
+                if (/[A-Z]/.test(password) && /[0-9]/.test(password)) {
+                    strengthLevel = 'strong';
+                    strengthText = '✓ Strong password';
+                } else if (/[A-Z]/.test(password) || /[0-9]/.test(password)) {
+                    strengthLevel = 'medium';
+                    strengthText = '⚠ Medium - Add more characters for strength';
+                } else {
+                    strengthLevel = 'medium';
+                    strengthText = '⚠ Medium - Add uppercase or numbers';
+                }
+            }
+
+            strength.textContent = strengthText;
+            strength.className = 'password-strength ' + strengthLevel;
+        }
+
+        function validateAdminRegisterForm() {
+            const fullName = document.getElementById('full_name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+
+            // Clear previous messages
+            errorMessage.classList.remove('show');
+            successMessage.classList.remove('show');
+
+            // Validate full name
+            if (fullName === '') {
+                showError('Full name is required');
+                return false;
+            }
+
+            if (fullName.length < 3) {
+                showError('Full name must be at least 3 characters');
+                return false;
+            }
+
+            // Validate email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showError('Please enter a valid email address');
+                return false;
+            }
+
+            // Validate username
+            if (username === '') {
+                showError('Username is required');
+                return false;
+            }
+
+            if (username.length < 3) {
+                showError('Username must be at least 3 characters');
+                return false;
+            }
+
+            if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+                showError('Username can only contain letters, numbers, and underscores');
+                return false;
+            }
+
+            // Validate password
+            if (password === '') {
+                showError('Password is required');
+                return false;
+            }
+
+            if (password.length < 6) {
+                showError('Password must be at least 6 characters long');
+                return false;
+            }
+
+            // Validate password match
+            if (password !== confirmPassword) {
+                showError('Passwords do not match');
+                return false;
+            }
+
+            // All validations passed
+            showSuccess('Account created successfully! Redirecting to login...');
+            
+            // Submit form after showing success message
+            setTimeout(() => {
+                document.querySelector('.admin-register-form').submit();
+            }, 1500);
+
+            return false; // Prevent immediate submission
+        }
+
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = '❌ ' + message;
+            errorMessage.classList.add('show');
+            window.scrollTo(0, 0);
+        }
+
+        function showSuccess(message) {
+            const successMessage = document.getElementById('successMessage');
+            successMessage.textContent = '✓ ' + message;
+            successMessage.classList.add('show');
+        }
+
+        // Show error if registration failed
+        {% if error %}
+            document.addEventListener('DOMContentLoaded', function() {
+                showError('{{ error }}');
+            });
+        {% endif %}
+    </script>
+
+</body>
+</html>
