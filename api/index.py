@@ -225,6 +225,105 @@ def verify_admin_credentials(username, password):
     return username in credentials and credentials[username]["password"] == password
 
 
+def ensure_student_users_table():
+    try:
+        conn = sqlite3.connect(get_database_path())
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                mobile TEXT,
+                email TEXT UNIQUE,
+                enrollment TEXT UNIQUE,
+                password TEXT NOT NULL
+            )
+            """
+        )
+
+        cursor.execute("PRAGMA table_info(users)")
+        existing_columns = {row[1] for row in cursor.fetchall()}
+
+        if "mobile" not in existing_columns:
+            cursor.execute("ALTER TABLE users ADD COLUMN mobile TEXT")
+        if "enrollment" not in existing_columns:
+            cursor.execute("ALTER TABLE users ADD COLUMN enrollment TEXT")
+
+        cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email)")
+        cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_enrollment ON users(enrollment)")
+
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"Error ensuring student users table: {e}")
+
+
+def register_student(name, mobile, email, enrollment, password):
+    ensure_student_users_table()
+
+    try:
+        conn = sqlite3.connect(get_database_path())
+        cursor = conn.cursor()
+        cursor.execute("SELECT id FROM users WHERE email = ? OR enrollment = ?", (email, enrollment))
+        existing_user = cursor.fetchone()
+        if existing_user:
+            conn.close()
+            return False, "Student already registered with this email or enrollment number."
+
+        cursor.execute(
+            """
+            INSERT INTO users (name, mobile, email, enrollment, password)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (name, mobile, email.lower(), enrollment, password),
+        )
+        conn.commit()
+        conn.close()
+        return True, "Student registered successfully."
+    except Exception as e:
+        print(f"Error registering student: {e}")
+        return False, "Unable to register student right now."
+
+
+def verify_student_credentials(username, enrollment, password):
+    ensure_student_users_table()
+
+    try:
+        conn = sqlite3.connect(get_database_path())
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT id, name, email, enrollment
+            FROM users
+            WHERE enrollment = ? AND password = ?
+            """,
+            (enrollment, password),
+        )
+        user = cursor.fetchone()
+        conn.close()
+
+        if not user:
+            return None
+
+        submitted_username = username.strip().lower()
+        registered_name = (user[1] or "").strip().lower()
+        registered_email = (user[2] or "").strip().lower()
+
+        if submitted_username not in {registered_name, registered_email}:
+            return None
+
+        return {
+            "id": user[0],
+            "name": user[1],
+            "email": user[2],
+            "enrollment": user[3],
+        }
+    except Exception as e:
+        print(f"Error verifying student credentials: {e}")
+        return None
+
+
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -336,9 +435,21 @@ def login():
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         enrollment = request.form.get("enrollment", "").strip()
+        password = request.form.get("password", "").strip()
 
-        session["student_name"] = username or "Student"
-        session["student_id"] = enrollment or "00000"
+        if not username or not enrollment or not password:
+            return render_template("login.html", error="Username or email, enrollment number, and password are required.")
+
+        student = verify_student_credentials(username, enrollment, password)
+        if not student:
+            return render_template(
+                "login.html",
+                error="Invalid student credentials. Use the same name or email, enrollment number, and password from registration.",
+            )
+
+        session["student_name"] = student["name"]
+        session["student_id"] = student["enrollment"]
+        session["student_email"] = student["email"]
 
         return redirect(url_for("dashboard"))
     return render_template("login.html")
@@ -347,7 +458,28 @@ def login():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        return redirect(url_for("login"))
+        name = request.form.get("name", "").strip()
+        mobile = request.form.get("mobile", "").strip()
+        email = request.form.get("email", "").strip().lower()
+        enrollment = request.form.get("enrollment", "").strip()
+        password = request.form.get("password", "").strip()
+
+        if not all([name, mobile, email, enrollment, password]):
+            return render_template("register.html", error="All registration fields are required.")
+        if len(name) < 3:
+            return render_template("register.html", error="Enter a valid full name.")
+        if len(mobile) != 10 or not mobile.isdigit():
+            return render_template("register.html", error="Enter a valid 10-digit mobile number.")
+        if not email.endswith("@paruluniversity.ac.in"):
+            return render_template("register.html", error="Use your university email address only.")
+        if len(password) < 4:
+            return render_template("register.html", error="Password must be at least 4 characters.")
+
+        success, message = register_student(name, mobile, email, enrollment, password)
+        if not success:
+            return render_template("register.html", error=message)
+
+        return render_template("login.html", success="Registration successful. Please log in with your registered details.")
     return render_template("register.html")
 
 
