@@ -2,7 +2,22 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>University events</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="University Event Management Platform - Discover and participate in cultural, sports, and technical events happening across campus">
+    <meta name="keywords" content="university events, student events, campus activities, cultural events, sports events">
+    <meta name="author" content="Event Management Team">
+    <meta property="og:title" content="University Event Management Platform">
+    <meta property="og:description" content="Discover and participate in university events - cultural, sports, and technical activities">
+    <meta property="og:url" content="https://event-management-bice-kappa.vercel.app/">
+    <meta property="og:type" content="website">
+    <meta name="google-site-verification" content="hUTB403L-9th52sBid-bcq4--4V1ZqrP_jmsKIOk_Y0" />
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Events">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect fill='%23000000' width='192' height='192'/%3E%3Ctext x='50%' y='50%' font-size='80' font-weight='bold' fill='white' text-anchor='middle' dy='.3em'%3E📅%3C/text%3E%3C/svg%3E">
+    <title>University Events | Unified Event Management Platform</title>
 
     <!-- Global CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
@@ -15,7 +30,7 @@
         <a href="/">Home</a>
         <a href="/login">Student Login</a>
         <a href="/register">Register</a>
-        <a href="/admin_dashboard">Admin</a>
+        <a href="/admin_login">Admin Portal</a>
     </div>
 
     <!-- ===== MAIN CONTENT ===== -->
@@ -56,7 +71,18 @@
 
     </div>
 
-    
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('{{ url_for("static", filename="service-worker.js") }}')
+                .then(registration => {
+                    console.log('Service Worker registered successfully:', registration);
+                })
+                .catch(error => {
+                    console.log('Service Worker registration failed:', error);
+                });
+        }
+    </script>
 
 </body>
 </html>

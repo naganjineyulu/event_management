@@ -2,13 +2,177 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Event Details</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="View detailed information about university events - registration, schedule, and participation details">
+    <meta name="keywords" content="event details, event information, registration">
+    <meta name="author" content="Event Management Team">
+    <meta property="og:title" content="Event Details | University Event Management">
+    <title>Event Details | University Event Management</title>
 
     <!-- Global CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        /* 3D Animation Styles for Event Details */
+        .event-animation-container {
+            display: flex;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            perspective: 1000px;
+            animation: fadeOutAnimation 3.5s ease-in-out forwards;
+        }
+
+        @keyframes fadeOutAnimation {
+            0% {
+                opacity: 1;
+                visibility: visible;
+            }
+            70% {
+                opacity: 1;
+                visibility: visible;
+            }
+            100% {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+
+        .event-cube-loader {
+            width: 120px;
+            height: 120px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotateCubeEvent 4s infinite linear;
+        }
+
+        .event-cube-face {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border: 2px solid #fff;
+            opacity: 0.85;
+            font-size: 32px;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .event-cube-face:nth-child(1) {
+            transform: rotateY(0deg) translateZ(60px);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .event-cube-face:nth-child(2) {
+            transform: rotateY(90deg) translateZ(60px);
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .event-cube-face:nth-child(3) {
+            transform: rotateY(180deg) translateZ(60px);
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .event-cube-face:nth-child(4) {
+            transform: rotateY(270deg) translateZ(60px);
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .event-cube-face:nth-child(5) {
+            transform: rotateX(90deg) translateZ(60px);
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .event-cube-face:nth-child(6) {
+            transform: rotateX(-90deg) translateZ(60px);
+            background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+        }
+
+        @keyframes rotateCubeEvent {
+            0% {
+                transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg);
+            }
+            100% {
+                transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg);
+            }
+        }
+
+        .event-loading-message {
+            position: absolute;
+            bottom: 80px;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        .event-pulse-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #fff;
+            margin: 0 4px;
+            animation: eventPulse 1.5s infinite;
+        }
+
+        .event-pulse-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .event-pulse-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes eventPulse {
+            0%, 100% {
+                opacity: 0.3;
+                transform: scale(0.8);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.3);
+            }
+        }
+
+        .event-info-text {
+            position: absolute;
+            bottom: 30px;
+            color: #cbd5f5;
+            font-size: 13px;
+            opacity: 0.7;
+        }
+    </style>
 </head>
 
 <body class="fade-in">
+
+    <!-- ===== 3D EVENT DETAILS LOADING ANIMATION ===== -->
+    <div class="event-animation-container">
+        <div style="position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
+            <div class="event-cube-loader">
+                <div class="event-cube-face">📋</div>
+                <div class="event-cube-face">📅</div>
+                <div class="event-cube-face">📍</div>
+                <div class="event-cube-face">💰</div>
+                <div class="event-cube-face">📝</div>
+                <div class="event-cube-face">✨</div>
+            </div>
+            <div class="event-loading-message">
+                Loading Event Details<span class="event-pulse-dot"></span><span class="event-pulse-dot"></span><span class="event-pulse-dot"></span>
+            </div>
+            <div class="event-info-text">Fetching event information...</div>
+        </div>
+    </div>
 
     <!-- ===== NAVIGATION BAR ===== -->
     <div class="navbar">
@@ -44,7 +208,7 @@
                 This is a Free Event 🎉
             </p>
 
-            <a href="/register_event/{{ event._id }}">
+            <a href="/register_event/{{ event.id }}">
                 <button class="success-btn">
                     Register Now
                 </button>
@@ -58,7 +222,7 @@
                 Payment Required 💳
             </p>
 
-            <a href="/register_event/{{ event._id }}">
+            <a href="/register_event/{{ event.id }}">
                 <button>
                     Proceed to Payment
                 </button>
@@ -67,6 +231,19 @@
         {% endif %}
 
     </div>
+
+    <!-- ===== 3D ANIMATION SCRIPT ===== -->
+    <script>
+        // Auto-hide animation after 3.5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const animationContainer = document.querySelector('.event-animation-container');
+            
+            // Animation will automatically fade out after 3.5 seconds due to CSS animation
+            setTimeout(() => {
+                animationContainer.style.pointerEvents = 'none';
+            }, 3500);
+        });
+    </script>
 
 </body>
 </html>

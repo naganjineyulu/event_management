@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin_dashboard
+Disallow: /account
+Disallow: /payment
+Disallow: /ticket
+
+Sitemap: https://event-management-bice-kappa.vercel.app/sitemap.xml

@@ -2,7 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Events</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Browse and register for university events - cultural, sports, and technical activities happening on campus">
+    <meta name="keywords" content="events, university events, campus activities, event registration">
+    <meta name="author" content="Event Management Team">
+    <meta property="og:title" content="Available Events | University Event Management">
+    <meta property="og:description" content="Discover and participate in university events">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Events">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <title>Events | University Event Management Platform</title>
 
     <!-- Global CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
@@ -44,7 +55,7 @@
                     Price: ₹{{ event.price }}
                 </p>
 
-                <a href="/event/{{ event._id }}">
+                <a href="/event/{{ event.id }}">
                     <button>View Details</button>
                 </a>
 
@@ -52,6 +63,15 @@
         {% endfor %}
 
     </div>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('{{ url_for("static", filename="service-worker.js") }}')
+                .then(registration => console.log('Service Worker registered'))
+                .catch(error => console.log('Service Worker registration failed:', error));
+        }
+    </script>
 
 </body>
 </html>

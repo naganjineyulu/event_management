@@ -2,7 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Add Event</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Create and publish new university events - add event details, schedule, and registration info">
+    <meta name="keywords" content="create event, event creation, event management">
+    <meta name="author" content="Event Management Team">
+    <meta property="og:title" content="Add Event | University Event Management">
+    <title>Add Event | University Event Management</title>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
@@ -19,10 +24,158 @@
         .invalid {
             border: 2px solid #ef4444;
         }
+
+        /* 3D Animation Styles */
+        .animation-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            perspective: 1000px;
+        }
+
+        .animation-container.active {
+            display: flex;
+        }
+
+        .cube-loader {
+            width: 100px;
+            height: 100px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotateCube 5s infinite linear;
+        }
+
+        .cube-face {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: 2px solid #fff;
+            opacity: 0.8;
+            font-size: 24px;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .cube-face:nth-child(1) {
+            transform: rotateY(0deg) translateZ(50px);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .cube-face:nth-child(2) {
+            transform: rotateY(90deg) translateZ(50px);
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .cube-face:nth-child(3) {
+            transform: rotateY(180deg) translateZ(50px);
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .cube-face:nth-child(4) {
+            transform: rotateY(270deg) translateZ(50px);
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .cube-face:nth-child(5) {
+            transform: rotateX(90deg) translateZ(50px);
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .cube-face:nth-child(6) {
+            transform: rotateX(-90deg) translateZ(50px);
+            background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+        }
+
+        @keyframes rotateCube {
+            0% {
+                transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg);
+            }
+            100% {
+                transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg);
+            }
+        }
+
+        .success-message {
+            position: absolute;
+            bottom: 50px;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .pulse-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #fff;
+            margin: 0 3px;
+            animation: pulse 1.5s infinite;
+        }
+
+        .pulse-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .pulse-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.3;
+                transform: scale(0.8);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
     </style>
 </head>
 
 <body class="fade-in">
+
+    <!-- 3D Animation Container -->
+    <div class="animation-container" id="animationContainer">
+        <div style="position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
+            <div class="cube-loader">
+                <div class="cube-face">✓</div>
+                <div class="cube-face">✓</div>
+                <div class="cube-face">✓</div>
+                <div class="cube-face">✓</div>
+                <div class="cube-face">✓</div>
+                <div class="cube-face">✓</div>
+            </div>
+            <div class="success-message">
+                Creating Event<span class="pulse-dot"></span><span class="pulse-dot"></span><span class="pulse-dot"></span>
+            </div>
+        </div>
+    </div>
 
     <div class="admin-header">
         Add New Event – Unievents
@@ -31,12 +184,12 @@
     <div class="navbar">
         <a href="/admin_dashboard">Dashboard</a>
         <a href="/add_event">Add Event</a>
-        <a href="/logout">Logout</a>
+        <a href="/admin_logout">Logout</a>
     </div>
 
     <h2>Create Event</h2>
 
-    <form method="POST" onsubmit="return validateForm()">
+    <form method="POST" onsubmit="return handleFormSubmit(event)">
 
         <input type="text" id="title" name="title" placeholder="Event Title"><br>
         <span class="error" id="titleError"></span><br>
@@ -47,7 +200,8 @@
         <input type="text" id="category" name="category" placeholder="Category"><br>
         <span class="error" id="catError"></span><br>
 
-        <input type="text" id="date" name="date" placeholder="Date"><br>
+        <label for="date">Select Event Date:</label><br>
+        <input type="date" id="date" name="date" required><br>
         <span class="error" id="dateError"></span><br>
 
         <input type="number" id="price" name="price" placeholder="Price"><br>
@@ -106,13 +260,24 @@
             }
 
             // DATE
-            if (date.value.trim() === "") {
+            if (date.value === "") {
                 document.getElementById("dateError").innerText = "Date required";
                 date.classList.add("invalid");
                 valid = false;
             } else {
-                date.classList.remove("invalid");
-                date.classList.add("valid");
+                // Validate date is not in the past
+                const selectedDate = new Date(date.value);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                if (selectedDate < today) {
+                    document.getElementById("dateError").innerText = "Date cannot be in the past";
+                    date.classList.add("invalid");
+                    valid = false;
+                } else {
+                    date.classList.remove("invalid");
+                    date.classList.add("valid");
+                }
             }
 
             // PRICE
@@ -126,6 +291,27 @@
             }
 
             return valid;
+        }
+
+        function handleFormSubmit(event) {
+            // Validate the form first
+            if (!validateForm()) {
+                event.preventDefault();
+                return false;
+            }
+
+            // Show 3D animation
+            const animationContainer = document.getElementById("animationContainer");
+            animationContainer.classList.add("active");
+
+            // Submit the form after showing animation for 2 seconds
+            setTimeout(() => {
+                event.target.submit();
+            }, 2000);
+
+            // Prevent default form submission
+            event.preventDefault();
+            return false;
         }
     </script>
 

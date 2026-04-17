@@ -29,7 +29,9 @@ CREATE TABLE IF NOT EXISTS events (
     title TEXT,
     description TEXT,
     date TEXT,
-    location TEXT
+    location TEXT,
+    category TEXT,
+    price REAL
 )
 """)
 
