@@ -2,7 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Event Ticket</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Event Ticket - Your digital ticket for university events with QR code and event details">
+    <meta name="keywords" content="event ticket, digital ticket, QR code, event pass">
+    <meta name="author" content="Event Management Team">
+    <meta property="og:title" content="Event Ticket | University Event Management">
+    <title>Event Ticket | University Event Management</title>
 
     <!-- Global CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
@@ -21,40 +26,124 @@
     <h2>🎟 Ticket Generated Successfully</h2>
 
     <!-- ===== TICKET PANEL ===== -->
-    <div class="ticket">
+    <div style="max-width: 500px; margin: 30px auto;">
+        <div style="
+            background: linear-gradient(135deg, #5f3dc4 0%, #7c5cdb 100%);
+            border-radius: 12px;
+            padding: 0;
+            box-shadow: 0 8px 24px rgba(95, 61, 196, 0.3);
+            overflow: hidden;
+        ">
+            <!-- Ticket Header -->
+            <div style="background: white; padding: 20px; text-align: center; border-bottom: 3px dashed #5f3dc4;">
+                <h3 style="margin: 0; color: #5f3dc4; font-size: 28px;">🎫 EVENT TICKET</h3>
+            </div>
 
-        <h3>{{ event.title }}</h3>
+            <!-- Ticket Content -->
+            <div style="color: white; padding: 30px 25px;">
+                
+                <!-- Event Title -->
+                <h2 style="margin: 0 0 15px 0; text-align: center; font-size: 24px; text-transform: uppercase;">
+                    {{ event.title }}
+                </h2>
 
-        <p style="color:#cbd5f5;">
-            {{ event.description }}
-        </p>
+                <!-- Event Description -->
+                <p style="margin: 0 0 20px 0; text-align: center; font-size: 14px; color: #e0d5ff;">
+                    {{ event.description }}
+                </p>
 
-        <hr style="margin:10px;">
+                <hr style="border: 1px dashed rgba(255,255,255,0.3); margin: 20px 0;">
 
-        <p>
-            <b>Student:</b> {{ session.student_name }}
-        </p>
+                <!-- Student Info -->
+                <div style="margin-bottom: 15px;">
+                    <p style="margin: 8px 0; font-size: 13px; color: #e0d5ff;">
+                        <b>STUDENT NAME:</b><br>
+                        <span style="font-size: 16px; color: #facc15;">{{ student_name }}</span>
+                    </p>
+                </div>
 
-        <p>
-            <b>Enrollment:</b> {{ session.student_id }}
-        </p>
+                <div style="margin-bottom: 15px;">
+                    <p style="margin: 8px 0; font-size: 13px; color: #e0d5ff;">
+                        <b>ENROLLMENT ID:</b><br>
+                        <span style="font-size: 16px; color: #facc15;">{{ student_id }}</span>
+                    </p>
+                </div>
 
-        <p style="font-size:18px; font-weight:bold; color:#facc15;">
-            Ticket ID: {{ ticket_id }}
-        </p>
+                <hr style="border: 1px dashed rgba(255,255,255,0.3); margin: 20px 0;">
 
-        <p style="font-size:13px; color:#22c55e;">
-            Please present this ticket at the event entrance
-        </p>
+                <!-- Ticket ID -->
+                <div style="text-align: center; margin: 20px 0;">
+                    <p style="margin: 5px 0; font-size: 12px; color: #e0d5ff;">TICKET ID</p>
+                    <p style="margin: 5px 0; font-size: 20px; font-weight: bold; color: #facc15; letter-spacing: 2px;">
+                        {{ ticket_id }}
+                    </p>
+                </div>
 
-        <br>
+                {% if payment_proof %}
+                    <div style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.15); padding: 12px; border-radius: 8px; margin: 18px 0;">
+                        <p style="margin: 0 0 6px 0; font-size: 12px; color: #e0d5ff;">PAYMENT PROOF</p>
+                        <p style="margin: 0; font-size: 15px; color: #facc15; word-break: break-word;">
+                            {{ payment_proof.original_name }}
+                        </p>
+                    </div>
+                {% endif %}
 
-        <a href="/student_dashboard">
-            <button class="success-btn">
-                Back to Dashboard
-            </button>
-        </a>
+                <hr style="border: 1px dashed rgba(255,255,255,0.3); margin: 20px 0;">
 
+                <!-- Important Notice -->
+                <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 6px; margin: 15px 0;">
+                    <p style="margin: 0; font-size: 12px; text-align: center; color: #22c55e;">
+                        ✓ Please present this ticket at the event entrance<br>
+                        ✓ Keep this ticket safe for future reference
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- Perforated Line -->
+            <div style="height: 3px; background: repeating-linear-gradient(
+                90deg,
+                #5f3dc4 0px,
+                #5f3dc4 10px,
+                transparent 10px,
+                transparent 20px
+            );"></div>
+
+            <!-- Action Buttons -->
+            <div style="background: white; padding: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                <a href="{{ url_for('download_ticket', ticket_id=ticket_id, event_id=event.id, event_title=event.title, event_description=event.description, student_name=student_name, student_id=student_id) }}" style="text-decoration: none;">
+                    <button style="
+                        background: #22c55e;
+                        color: white;
+                        padding: 12px 24px;
+                        border: none;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-size: 14px;
+                        font-weight: bold;
+                        transition: background 0.3s;
+                    " onmouseover="this.style.background='#16a34a'" onmouseout="this.style.background='#22c55e'">
+                        📥 Download Ticket
+                    </button>
+                </a>
+                
+                <a href="/student_dashboard" style="text-decoration: none;">
+                    <button style="
+                        background: #5f3dc4;
+                        color: white;
+                        padding: 12px 24px;
+                        border: none;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-size: 14px;
+                        font-weight: bold;
+                        transition: background 0.3s;
+                    " onmouseover="this.style.background='#4c2a96'" onmouseout="this.style.background='#5f3dc4'">
+                        ← Back to Dashboard
+                    </button>
+                </a>
+            </div>
+        </div>
     </div>
 
 </body>

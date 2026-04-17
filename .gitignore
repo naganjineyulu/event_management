@@ -1,0 +1,7 @@
+.vercel
+.env*.local
+venv/
+.venv/
+__pycache__/
+*.pyc
+database/payment_proofs/

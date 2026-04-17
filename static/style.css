@@ -186,6 +186,107 @@ a:hover {
     backdrop-filter: blur(10px);
 }
 
+.payment-error {
+    margin: 15px 0;
+    padding: 12px 14px;
+    border-radius: 8px;
+    background: rgba(248, 113, 113, 0.14);
+    color: #fecaca;
+    border: 1px solid rgba(248, 113, 113, 0.35);
+}
+
+.payment-proof-card {
+    text-align: left;
+    border: 1px solid rgba(250, 204, 21, 0.18);
+    background: linear-gradient(180deg, rgba(30, 41, 59, 0.92), rgba(15, 23, 42, 0.92));
+}
+
+.payment-proof-title {
+    margin: 0 0 8px;
+    font-weight: 700;
+    font-size: 16px;
+    color: #f8fafc;
+}
+
+.payment-proof-help {
+    font-size: 13px;
+    color: #cbd5f5;
+    margin: 0 0 14px;
+    line-height: 1.5;
+}
+
+.payment-proof-input {
+    width: 100%;
+    margin: 0;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px dashed rgba(95, 61, 196, 0.55);
+    background: rgba(255, 255, 255, 0.96);
+    color: #111827;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.payment-proof-input::file-selector-button {
+    margin-right: 14px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #5f3dc4, #7c5cdb);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(95, 61, 196, 0.28);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.payment-proof-input::-webkit-file-upload-button {
+    margin-right: 14px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #5f3dc4, #7c5cdb);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(95, 61, 196, 0.28);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.payment-proof-input:hover::file-selector-button,
+.payment-proof-input:hover::-webkit-file-upload-button {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 18px rgba(95, 61, 196, 0.34);
+    filter: brightness(1.05);
+}
+
+.payment-proof-input:focus::file-selector-button,
+.payment-proof-input:focus::-webkit-file-upload-button {
+    box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.22), 0 8px 18px rgba(95, 61, 196, 0.3);
+}
+
+.payment-proof-input:hover {
+    border-color: #7c5cdb;
+    box-shadow: 0 0 0 4px rgba(124, 92, 219, 0.12);
+}
+
+.payment-proof-input:focus {
+    outline: none;
+    border-color: #facc15;
+    box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.18);
+}
+
+.payment-proof-note {
+    margin: 10px 0 0;
+    font-size: 12px;
+    color: #94a3b8;
+}
+
 /* ===== TICKET PAGE ===== */
 
 .ticket {
@@ -212,5 +313,13 @@ a:hover {
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+@media (max-width: 480px) {
+    .payment-box {
+        width: calc(100% - 32px);
+        padding: 20px 16px;
+        box-sizing: border-box;
     }
 }
