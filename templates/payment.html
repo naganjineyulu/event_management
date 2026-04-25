@@ -9,13 +9,11 @@
     <meta property="og:title" content="Payment | University Event Management">
     <title>Event Payment | University Event Management</title>
 
-    <!-- Global CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body class="fade-in">
 
-    <!-- ===== NAVIGATION BAR ===== -->
     <div class="navbar">
         <a href="/">Home</a>
         <a href="/events">Events</a>
@@ -23,96 +21,95 @@
         <a href="/logout">Logout</a>
     </div>
 
-    <h2>Complete Payment</h2>
+    <main class="payment-page">
+        <h2>Complete Payment</h2>
 
-    <!-- ===== PAYMENT PANEL ===== -->
-    <div class="payment-box">
+        <div class="payment-box">
+            {% if event %}
+                <h3>{{ event.title }}</h3>
 
-        {% if event %}
-            <h3>{{ event.title }}</h3>
-
-            <p style="color:#cbd5f5;">
-                {{ event.description }}
-            </p>
-
-            <p style="font-size:20px; font-weight:bold; color:#facc15;">
-                Amount: ₹{{ event.price }}
-            </p>
-        {% else %}
-            <h3>Payment</h3>
-            <p style="color:#cbd5f5;">
-                Event not found
-            </p>
-        {% endif %}
-
-        {% if error %}
-            <div class="payment-error">
-                {{ error }}
-            </div>
-        {% endif %}
-
-        <hr style="margin:15px;">
-
-        <!-- PAYMENT METHODS -->
-        <p>Select Payment Method</p>
-
-        <div class="card">
-
-            <p>📱 Pay via UPI</p>
-            <p style="font-size:13px; color:#cbd5f5;">
-                UPI ID: <b>paruluniversity@upi</b>
-            </p>
-
-        </div>
-
-        <div class="card">
-            <div style="display: flex; align-items: center; gap: 15px; padding: 10px;">
-                <img src="{{ url_for('static', filename='phonepe_logo.png') }}" alt="PhonePe" style="width: 70px; height: 70px; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                <div>
-                    <p style="margin: 0; font-weight: bold; font-size: 18px; color: #5f3dc4;">PhonePe</p>
-                    <p style="font-size:13px; color:#cbd5f5; margin: 5px 0;">
-                        Scan QR code or send to registered number
-                    </p>
-                </div>
-            </div>
-            <div style="margin-top: 15px; text-align: center; padding: 20px; background: white; border-radius: 8px;">
-                <p style="margin: 0 0 10px 0; font-size: 12px; color: #666;">Scan this QR code with PhonePe</p>
-                <img src="{{ url_for('static', filename='fake_qr.png') }}" alt="PhonePe QR Code" style="width: 220px; height: 220px; border: 4px solid #5f3dc4; border-radius: 8px; box-shadow: 0 4px 12px rgba(95, 61, 196, 0.3); background: white; padding: 8px;">
-            </div>
-        </div>
-
-        <div class="card">
-            <p>�💳 Debit / Credit Card</p>
-        </div>
-
-        <div class="card">
-            <p>🏦 Net Banking</p>
-        </div>
-
-        <br>
-
-        <!-- PAYMENT BUTTON -->
-        <form method="POST" enctype="multipart/form-data">
-            <div class="card payment-proof-card">
-                <p class="payment-proof-title">Upload Payment Proof</p>
-                <p class="payment-proof-help">
-                    Add your payment screenshot or receipt before generating the ticket. Invalid or renamed files will be rejected.
+                <p class="payment-description">
+                    {{ event.description }}
                 </p>
-                <input
-                    class="payment-proof-input"
-                    type="file"
-                    name="payment_proof"
-                    accept=".png,.jpg,.jpeg,.pdf,.webp"
-                    required
-                >
-                <p class="payment-proof-note">Accepted formats: PNG, JPG, JPEG, WEBP, PDF. Max size: 5 MB.</p>
-            </div>
-            <button class="success-btn">
-                Upload Proof and Continue
-            </button>
-        </form>
 
-    </div>
+                <p class="payment-amount">
+                    Amount: Rs. {{ event.price }}
+                </p>
+            {% else %}
+                <h3>Payment</h3>
+                <p class="payment-description">
+                    Event not found
+                </p>
+            {% endif %}
+
+            {% if error %}
+                <div class="payment-error">
+                    {{ error }}
+                </div>
+            {% endif %}
+
+            <hr class="payment-divider">
+
+            <section class="payment-section">
+                <p class="payment-section-title">1. Choose a payment method</p>
+
+                <div class="payment-method-list">
+                    <div class="payment-method-card">
+                        <p class="payment-method-title">Pay via UPI</p>
+                        <p class="payment-method-detail">
+                            UPI ID: <b>paruluniversity@upi</b>
+                        </p>
+                    </div>
+
+                    <div class="payment-method-card">
+                        <div class="payment-method-header">
+                            <div class="payment-method-logo">P</div>
+                            <div>
+                                <p class="payment-method-title">PhonePe</p>
+                                <p class="payment-method-detail">
+                                    Scan QR code or send to the registered number.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="payment-qr-box">
+                            <p>Scan this QR code with PhonePe</p>
+                            <img src="{{ url_for('static', filename='fake_qr.png') }}" alt="PhonePe QR Code">
+                        </div>
+                    </div>
+
+                    <div class="payment-method-card">
+                        <p class="payment-method-title">Debit / Credit Card</p>
+                    </div>
+
+                    <div class="payment-method-card">
+                        <p class="payment-method-title">Net Banking</p>
+                    </div>
+                </div>
+            </section>
+
+            <form class="payment-form" method="POST" enctype="multipart/form-data">
+                <section class="payment-proof-card">
+                    <p class="payment-section-title">2. Upload payment proof</p>
+                    <p class="payment-proof-help">
+                        Add your payment screenshot or receipt before generating the ticket. Invalid or renamed files will be rejected.
+                    </p>
+                    <input
+                        class="payment-proof-input"
+                        type="file"
+                        name="payment_proof"
+                        accept=".png,.jpg,.jpeg,.pdf,.webp"
+                        required
+                    >
+                    <p class="payment-proof-note">Accepted formats: PNG, JPG, JPEG, WEBP, PDF. Max size: 5 MB.</p>
+                </section>
+
+                <button class="success-btn payment-submit-btn">
+                    Upload Proof and Continue
+                </button>
+            </form>
+        </div>
+    </main>
 
 </body>
 </html>

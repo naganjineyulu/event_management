@@ -15,8 +15,8 @@
     <style>
         .admin-register-container {
             max-width: 420px;
-            margin: 60px auto;
-            padding: 40px 35px;
+            margin: 24px auto 40px;
+            padding: 28px 35px;
             border-radius: 12px;
             background: linear-gradient(135deg, rgba(20, 20, 30, 0.95) 0%, rgba(40, 40, 60, 0.95) 100%);
             border: 2px solid #10b981;
@@ -26,7 +26,7 @@
         .admin-register-header {
             text-align: center;
             color: #fff;
-            margin-bottom: 35px;
+            margin-bottom: 24px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -34,9 +34,19 @@
         }
 
         .admin-register-header .lock-icon {
-            font-size: 56px;
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.45);
+            color: #10b981;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
             animation: lockPulse 2s infinite;
-            display: inline-block;
         }
 
         .admin-register-header h1 {
@@ -64,12 +74,21 @@
             display: flex;
             flex-direction: column;
             gap: 16px;
+            align-items: center;
+            margin: 0;
+            padding: 24px;
+            width: 100%;
+            box-sizing: border-box;
+            background: rgba(15, 23, 42, 0.82);
+            border-radius: 14px;
+            backdrop-filter: none;
         }
 
         .form-group {
             display: flex;
             flex-direction: column;
             gap: 8px;
+            width: min(100%, 356px);
         }
 
         .form-group label {
@@ -78,9 +97,13 @@
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 1px;
+            text-align: left;
         }
 
         .admin-register-form input {
+            width: 100%;
+            box-sizing: border-box;
+            margin: 0;
             padding: 14px 16px;
             border: 2px solid #444;
             border-radius: 8px;
@@ -103,6 +126,8 @@
         }
 
         .admin-register-btn {
+            width: min(100%, 356px);
+            margin-top: 10px;
             padding: 14px 16px;
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: #fff;
@@ -114,7 +139,6 @@
             transition: all 0.3s ease;
             text-transform: uppercase;
             letter-spacing: 1.5px;
-            margin-top: 10px;
             box-shadow: 0 5px 20px rgba(16, 185, 129, 0.3);
         }
 
@@ -245,7 +269,7 @@
     </style>
 </head>
 
-<body class="fade-in">
+<body class="fade-in" data-error="{{ error|default('', true)|e }}">
 
     <!-- ===== NAVIGATION BAR ===== -->
     <div class="navbar">
@@ -258,7 +282,7 @@
     <div class="admin-register-container">
 
         <div class="admin-register-header">
-            <div class="lock-icon">🔐</div>
+            <div class="lock-icon" aria-hidden="true">Lock</div>
             <h1>Create Admin Account</h1>
         </div>
 
@@ -323,9 +347,7 @@
                        required>
             </div>
 
-            <button type="submit" class="admin-register-btn">
-                ✓ Create Account
-            </button>
+            <button type="submit" class="admin-register-btn">Create Account</button>
 
         </form>
 
@@ -334,14 +356,14 @@
 
         <!-- Admin Info -->
         <div class="admin-info">
-            <p>👤 <strong>Registration Required</strong></p>
+            <p><strong>Registration Required</strong></p>
             <p>Create a secure admin account to manage events.</p>
             <p>Already have an account? <a href="/admin_login">Login here</a></p>
         </div>
 
         <!-- Security Info -->
         <div class="security-info">
-            🔒 Secure Registration | ✓ Password Encrypted
+            Secure Registration | Password Encrypted
         </div>
 
     </div>
@@ -359,18 +381,18 @@
 
             // Check password strength
             let strengthLevel = 'weak';
-            let strengthText = '❌ Weak - Add uppercase, numbers, or symbols';
+            let strengthText = 'Weak - Add uppercase, numbers, or symbols';
 
             if (password.length >= 8) {
                 if (/[A-Z]/.test(password) && /[0-9]/.test(password)) {
                     strengthLevel = 'strong';
-                    strengthText = '✓ Strong password';
+                    strengthText = 'Strong password';
                 } else if (/[A-Z]/.test(password) || /[0-9]/.test(password)) {
                     strengthLevel = 'medium';
-                    strengthText = '⚠ Medium - Add more characters for strength';
+                    strengthText = 'Medium - Add more characters for strength';
                 } else {
                     strengthLevel = 'medium';
-                    strengthText = '⚠ Medium - Add uppercase or numbers';
+                    strengthText = 'Medium - Add uppercase or numbers';
                 }
             }
 
@@ -456,23 +478,24 @@
 
         function showError(message) {
             const errorMessage = document.getElementById('errorMessage');
-            errorMessage.textContent = '❌ ' + message;
+            errorMessage.textContent = 'Error: ' + message;
             errorMessage.classList.add('show');
             window.scrollTo(0, 0);
         }
 
         function showSuccess(message) {
             const successMessage = document.getElementById('successMessage');
-            successMessage.textContent = '✓ ' + message;
+            successMessage.textContent = 'Success: ' + message;
             successMessage.classList.add('show');
         }
 
-        // Show error if registration failed
-        {% if error %}
-            document.addEventListener('DOMContentLoaded', function() {
-                showError('{{ error }}');
-            });
-        {% endif %}
+        document.addEventListener('DOMContentLoaded', function() {
+            const serverError = document.body.dataset.error;
+
+            if (serverError) {
+                showError(serverError);
+            }
+        });
     </script>
 
 </body>

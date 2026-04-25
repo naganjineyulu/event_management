@@ -27,18 +27,7 @@ app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
 ADMIN_CREDENTIALS_FILE = os.path.join(base_dir, "database", "admin_credentials.json")
 
-DEFAULT_ADMIN_CREDENTIALS = {
-    "admin": {
-        "password": "admin123",
-        "email": "admin@university.edu",
-        "full_name": "Admin User",
-    },
-    "manager": {
-        "password": "manager456",
-        "email": "manager@university.edu",
-        "full_name": "Manager User",
-    },
-}
+DEFAULT_ADMIN_CREDENTIALS = {}
 
 
 def load_admin_credentials():

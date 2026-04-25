@@ -4,17 +4,50 @@ import sqlite3
 import os
 import json
 import random
+import smtplib
 import shutil
 import string
+from datetime import datetime
 from functools import wraps
+from email.message import EmailMessage
+from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 from werkzeug.utils import secure_filename
 
 
 # IMPORTANT: templates and static paths - use absolute paths for Vercel
 api_dir = os.path.dirname(os.path.abspath(__file__))
 base_dir = os.path.dirname(api_dir)
+
+
+def load_local_env_file():
+    env_file = os.path.join(base_dir, ".env.local")
+    if not os.path.exists(env_file):
+        return
+
+    try:
+        with open(env_file, "r", encoding="utf-8") as f:
+            for raw_line in f:
+                line = raw_line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+
+                key, value = line.split("=", 1)
+                key = key.strip()
+                value = value.strip().strip('"').strip("'")
+
+                if key and key not in os.environ:
+                    os.environ[key] = value
+    except Exception as e:
+        print(f"Unable to load .env.local: {e}")
+
+
+load_local_env_file()
+
 is_vercel = bool(os.environ.get("VERCEL"))
-runnable_data_dir = os.path.join("/tmp", "event_management") if is_vercel else os.path.join(base_dir, "database")
+configured_data_dir = os.environ.get("EVENT_MANAGEMENT_DATA_DIR", "").strip()
+runnable_data_dir = configured_data_dir or (
+    os.path.join("/tmp", "event_management") if is_vercel else os.path.join(base_dir, "database")
+)
 app = Flask(
     __name__,
     template_folder=os.path.join(base_dir, "templates"),
@@ -35,18 +68,7 @@ BUNDLED_DB_PATH = os.path.join(base_dir, "database", "event.db")
 ALLOWED_PAYMENT_PROOF_EXTENSIONS = {"png", "jpg", "jpeg", "pdf", "webp"}
 MAX_PAYMENT_PROOF_SIZE = 5 * 1024 * 1024
 
-DEFAULT_ADMIN_CREDENTIALS = {
-    "admin": {
-        "password": "admin123",
-        "email": "admin@university.edu",
-        "full_name": "Admin User",
-    },
-    "manager": {
-        "password": "manager456",
-        "email": "manager@university.edu",
-        "full_name": "Manager User",
-    },
-}
+DEFAULT_ADMIN_CREDENTIALS = {}
 
 
 def ensure_runtime_data_dir():
@@ -54,18 +76,18 @@ def ensure_runtime_data_dir():
 
 
 def get_admin_credentials_file():
-    if not is_vercel:
+    if not is_vercel and not configured_data_dir:
         return BUNDLED_ADMIN_CREDENTIALS_FILE
 
     ensure_runtime_data_dir()
     runtime_file = os.path.join(runnable_data_dir, "admin_credentials.json")
-    if not os.path.exists(runtime_file) and os.path.exists(BUNDLED_ADMIN_CREDENTIALS_FILE):
+    if is_vercel and not os.path.exists(runtime_file) and os.path.exists(BUNDLED_ADMIN_CREDENTIALS_FILE):
         shutil.copy2(BUNDLED_ADMIN_CREDENTIALS_FILE, runtime_file)
     return runtime_file
 
 
 def get_database_path():
-    if not is_vercel:
+    if not is_vercel and not configured_data_dir:
         return BUNDLED_DB_PATH
 
     ensure_runtime_data_dir()
@@ -225,6 +247,117 @@ def verify_admin_credentials(username, password):
     return username in credentials and credentials[username]["password"] == password
 
 
+def get_reset_token_serializer():
+    return URLSafeTimedSerializer(app.secret_key, salt="password-reset")
+
+
+def build_reset_token(scope, identity):
+    serializer = get_reset_token_serializer()
+    return serializer.dumps({"scope": scope, "identity": identity})
+
+
+def read_reset_token(token, expected_scope, max_age=3600):
+    serializer = get_reset_token_serializer()
+    try:
+        payload = serializer.loads(token, max_age=max_age)
+    except SignatureExpired:
+        return None, "This reset link has expired. Please request a new one."
+    except BadSignature:
+        return None, "This reset link is invalid. Please request a new one."
+
+    if payload.get("scope") != expected_scope:
+        return None, "This reset link is invalid. Please request a new one."
+
+    return payload.get("identity"), None
+
+
+def send_email_message(to_email, subject, body):
+    smtp_host = os.environ.get("SMTP_HOST", "").strip()
+    smtp_port = int(os.environ.get("SMTP_PORT", "587"))
+    smtp_username = os.environ.get("SMTP_USERNAME", "").strip()
+    smtp_password = os.environ.get("SMTP_PASSWORD", "")
+    smtp_from_email = os.environ.get("SMTP_FROM_EMAIL", smtp_username).strip()
+    smtp_use_ssl = os.environ.get("SMTP_USE_SSL", "false").strip().lower() == "true"
+    smtp_use_tls = os.environ.get("SMTP_USE_TLS", "true").strip().lower() != "false"
+
+    if not smtp_host or not smtp_from_email:
+        return False, "Email sending is not configured on the server yet."
+
+    message = EmailMessage()
+    message["Subject"] = subject
+    message["From"] = smtp_from_email
+    message["To"] = to_email
+    message.set_content(body)
+
+    try:
+        if smtp_use_ssl:
+            with smtplib.SMTP_SSL(smtp_host, smtp_port, timeout=20) as server:
+                if smtp_username:
+                    server.login(smtp_username, smtp_password)
+                server.send_message(message)
+        else:
+            with smtplib.SMTP(smtp_host, smtp_port, timeout=20) as server:
+                server.ehlo()
+                if smtp_use_tls:
+                    server.starttls()
+                    server.ehlo()
+                if smtp_username:
+                    server.login(smtp_username, smtp_password)
+                server.send_message(message)
+        return True, None
+    except Exception as e:
+        print(f"Error sending email: {e}")
+        return False, "Unable to send reset email right now. Please try again later."
+
+
+def is_email_configured():
+    smtp_host = os.environ.get("SMTP_HOST", "").strip()
+    smtp_username = os.environ.get("SMTP_USERNAME", "").strip()
+    smtp_from_email = os.environ.get("SMTP_FROM_EMAIL", smtp_username).strip()
+    return bool(smtp_host and smtp_from_email)
+
+
+def get_request_ip():
+    forwarded_for = request.headers.get("X-Forwarded-For", "").split(",")[0].strip()
+    return forwarded_for or request.remote_addr or "Unknown"
+
+
+def send_login_notification(account_type, account_name, account_email):
+    if not is_email_configured():
+        print(f"Skipped {account_type.lower()} login email because SMTP is not configured.")
+        return
+
+    recipient_email = os.environ.get("LOGIN_ALERT_EMAIL", "").strip() or account_email
+    if not recipient_email:
+        print(f"Skipped {account_type.lower()} login email because no recipient email is available.")
+        return
+
+    login_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    user_agent = request.headers.get("User-Agent", "Unknown")
+    subject = f"{account_type} Login Alert"
+    body = (
+        f"Hello {account_name},\n\n"
+        f"A successful {account_type.lower()} login was detected.\n\n"
+        f"Account: {account_name}\n"
+        f"Email: {account_email or 'Not available'}\n"
+        f"Time: {login_time}\n"
+        f"IP address: {get_request_ip()}\n"
+        f"Device/browser: {user_agent}\n\n"
+        "If this was you, no action is needed. If you did not log in, reset your password immediately."
+    )
+
+    sent, error = send_email_message(recipient_email, subject, body)
+    if not sent:
+        print(f"Unable to send {account_type.lower()} login email: {error}")
+
+
+def get_base_url():
+    configured_url = os.environ.get("APP_BASE_URL", "").strip().rstrip("/")
+    if configured_url:
+        return configured_url
+    return request.url_root.rstrip("/")
+
+
 def ensure_student_users_table():
     try:
         conn = sqlite3.connect(get_database_path())
@@ -235,7 +368,7 @@ def ensure_student_users_table():
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 mobile TEXT,
-                email TEXT UNIQUE,
+                email TEXT NOT NULL,
                 enrollment TEXT UNIQUE,
                 password TEXT NOT NULL
             )
@@ -249,8 +382,37 @@ def ensure_student_users_table():
             cursor.execute("ALTER TABLE users ADD COLUMN mobile TEXT")
         if "enrollment" not in existing_columns:
             cursor.execute("ALTER TABLE users ADD COLUMN enrollment TEXT")
+        cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_enrollment ON users(enrollment)")
 
-        cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email)")
+        cursor.execute("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'users'")
+        table_sql_row = cursor.fetchone()
+        table_sql = (table_sql_row[0] or "").upper() if table_sql_row else ""
+        needs_email_migration = "EMAIL TEXT UNIQUE" in table_sql
+
+        if needs_email_migration:
+            cursor.execute(
+                """
+                CREATE TABLE users_new (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT NOT NULL,
+                    mobile TEXT,
+                    email TEXT NOT NULL,
+                    enrollment TEXT UNIQUE,
+                    password TEXT NOT NULL
+                )
+                """
+            )
+            cursor.execute(
+                """
+                INSERT INTO users_new (id, name, mobile, email, enrollment, password)
+                SELECT id, name, mobile, email, enrollment, password
+                FROM users
+                """
+            )
+            cursor.execute("DROP TABLE users")
+            cursor.execute("ALTER TABLE users_new RENAME TO users")
+
+        cursor.execute("DROP INDEX IF EXISTS idx_users_email")
         cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_enrollment ON users(enrollment)")
 
         conn.commit()
@@ -265,11 +427,11 @@ def register_student(name, mobile, email, enrollment, password):
     try:
         conn = sqlite3.connect(get_database_path())
         cursor = conn.cursor()
-        cursor.execute("SELECT id FROM users WHERE email = ? OR enrollment = ?", (email, enrollment))
+        cursor.execute("SELECT id FROM users WHERE enrollment = ?", (enrollment,))
         existing_user = cursor.fetchone()
         if existing_user:
             conn.close()
-            return False, "Student already registered with this email or enrollment number."
+            return False, "Student already registered with this enrollment number."
 
         cursor.execute(
             """
@@ -322,6 +484,65 @@ def verify_student_credentials(username, enrollment, password):
     except Exception as e:
         print(f"Error verifying student credentials: {e}")
         return None
+
+
+def find_student_for_password_reset(enrollment, email):
+    ensure_student_users_table()
+
+    try:
+        conn = sqlite3.connect(get_database_path())
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT id, name, email, enrollment
+            FROM users
+            WHERE enrollment = ? AND lower(email) = ?
+            """,
+            (enrollment, email.strip().lower()),
+        )
+        user = cursor.fetchone()
+        conn.close()
+
+        if not user:
+            return None
+
+        return {
+            "id": user[0],
+            "name": user[1],
+            "email": user[2],
+            "enrollment": user[3],
+        }
+    except Exception as e:
+        print(f"Error finding student for password reset: {e}")
+        return None
+
+
+def update_student_password(user_id, new_password):
+    ensure_student_users_table()
+
+    try:
+        conn = sqlite3.connect(get_database_path())
+        cursor = conn.cursor()
+        cursor.execute("UPDATE users SET password = ? WHERE id = ?", (new_password, user_id))
+        conn.commit()
+        updated_rows = cursor.rowcount
+        conn.close()
+        return updated_rows > 0
+    except Exception as e:
+        print(f"Error updating student password: {e}")
+        return False
+
+
+def update_admin_password(username, email, new_password):
+    credentials = load_admin_credentials()
+    admin = credentials.get(username)
+
+    if not admin or admin.get("email", "").strip().lower() != email.strip().lower():
+        return False
+
+    admin["password"] = new_password
+    credentials[username] = admin
+    return save_admin_credentials(credentials)
 
 
 def login_required(f):
@@ -405,8 +626,15 @@ def admin_login():
         password = request.form.get("password", "").strip()
 
         if verify_admin_credentials(username, password):
+            credentials = load_admin_credentials()
+            admin = credentials.get(username, {})
             session["admin_logged_in"] = True
             session["admin_username"] = username
+            send_login_notification(
+                "Admin",
+                admin.get("full_name") or username,
+                admin.get("email", ""),
+            )
             print(f"Admin '{username}' logged in successfully.")
             return redirect(url_for("admin_dashboard"))
 
@@ -425,6 +653,32 @@ def admin_logout():
     return redirect(url_for("home"))
 
 
+@app.route("/admin_test_email")
+@login_required
+def admin_test_email():
+    credentials = load_admin_credentials()
+    username = session.get("admin_username", "")
+    admin = credentials.get(username, {})
+    admin_email = admin.get("email", "").strip()
+
+    if not admin_email:
+        return "No email address is registered for this admin account.", 400
+
+    sent, error = send_email_message(
+        admin_email,
+        "Event Management Email Test",
+        (
+            f"Hello {admin.get('full_name') or username},\n\n"
+            "Your Event Management email configuration is working."
+        ),
+    )
+
+    if not sent:
+        return error, 500
+
+    return f"Test email sent to {admin_email}."
+
+
 @app.route("/")
 def home():
     return render_template("index.html")
@@ -438,18 +692,19 @@ def login():
         password = request.form.get("password", "").strip()
 
         if not username or not enrollment or not password:
-            return render_template("login.html", error="Username or email, enrollment number, and password are required.")
+            return render_template("login.html", error="Name or shared email, enrollment number, and password are required.")
 
         student = verify_student_credentials(username, enrollment, password)
         if not student:
             return render_template(
                 "login.html",
-                error="Invalid student credentials. Use the same name or email, enrollment number, and password from registration.",
+                error="Invalid student credentials. Use the same name or shared email, enrollment number, and password from registration.",
             )
 
         session["student_name"] = student["name"]
         session["student_id"] = student["enrollment"]
         session["student_email"] = student["email"]
+        send_login_notification("Student", student["name"], student["email"])
 
         return redirect(url_for("dashboard"))
     return render_template("login.html")
@@ -936,13 +1191,33 @@ def account():
 @app.route("/forgot_password", methods=["GET", "POST"])
 def forgot_password():
     if request.method == "POST":
-        username = request.form.get("username", "").strip()
-        email = request.form.get("email", "").strip()
+        enrollment = request.form.get("enrollment", "").strip()
+        email = request.form.get("email", "").strip().lower()
 
-        if not username or not email:
-            return render_template("forgot_password.html", error="Please provide both username and email!")
+        if not enrollment or not email:
+            return render_template("forgot_password.html", error="Please provide both enrollment number and email!")
 
-        print(f"Password reset link sent to {email}")
+        student = find_student_for_password_reset(enrollment, email)
+        if not student:
+            return render_template("forgot_password.html", error="Enrollment number and email do not match any student account.")
+
+        token = build_reset_token("student", {"user_id": student["id"], "email": student["email"]})
+        reset_link = f"{get_base_url()}{url_for('reset_password', token=token)}"
+        if not is_email_configured():
+            return render_template(
+                "forgot_password.html",
+                success="Email sending is not configured yet. Use this reset link to continue.",
+                reset_link=reset_link,
+            )
+
+        sent, error = send_email_message(
+            student["email"],
+            "Student Password Reset",
+            f"Hello {student['name']},\n\nUse this link to reset your password:\n{reset_link}\n\nThis link expires in 1 hour.",
+        )
+        if not sent:
+            return render_template("forgot_password.html", error=error)
+
         return render_template(
             "forgot_password.html",
             success="Password reset link has been sent to your email!",
@@ -955,14 +1230,30 @@ def forgot_password():
 def admin_forgot_password():
     if request.method == "POST":
         username = request.form.get("username", "").strip()
-        email = request.form.get("email", "").strip()
+        email = request.form.get("email", "").strip().lower()
 
         if not username or not email:
             return render_template("admin_forgot_password.html", error="Please provide both username and email!")
 
         credentials = load_admin_credentials()
-        if username in credentials and credentials[username].get("email") == email:
-            print(f"Admin password reset link sent to {email}")
+        if username in credentials and credentials[username].get("email", "").strip().lower() == email:
+            token = build_reset_token("admin", {"username": username, "email": email})
+            reset_link = f"{get_base_url()}{url_for('admin_reset_password', token=token)}"
+            if not is_email_configured():
+                return render_template(
+                    "admin_forgot_password.html",
+                    success="Email sending is not configured yet. Use this reset link to continue.",
+                    reset_link=reset_link,
+                )
+
+            sent, error = send_email_message(
+                email,
+                "Admin Password Reset",
+                f"Hello {credentials[username].get('full_name', username)},\n\nUse this link to reset your admin password:\n{reset_link}\n\nThis link expires in 1 hour.",
+            )
+            if not sent:
+                return render_template("admin_forgot_password.html", error=error)
+
             return render_template(
                 "admin_forgot_password.html",
                 success="Password reset link has been sent to your email!",
@@ -971,6 +1262,50 @@ def admin_forgot_password():
         return render_template("admin_forgot_password.html", error="Username and email do not match!")
 
     return render_template("admin_forgot_password.html")
+
+
+@app.route("/reset_password/<token>", methods=["GET", "POST"])
+def reset_password(token):
+    identity, token_error = read_reset_token(token, "student")
+    if token_error:
+        return render_template("reset_password.html", mode="student", error=token_error)
+
+    if request.method == "POST":
+        password = request.form.get("password", "").strip()
+        confirm_password = request.form.get("confirm_password", "").strip()
+
+        if len(password) < 4:
+            return render_template("reset_password.html", mode="student", error="Password must be at least 4 characters.")
+        if password != confirm_password:
+            return render_template("reset_password.html", mode="student", error="Passwords do not match.")
+        if not update_student_password(identity["user_id"], password):
+            return render_template("reset_password.html", mode="student", error="Unable to reset password right now.")
+
+        return render_template("reset_password.html", mode="student", success="Password updated successfully. You can now log in.")
+
+    return render_template("reset_password.html", mode="student")
+
+
+@app.route("/admin_reset_password/<token>", methods=["GET", "POST"])
+def admin_reset_password(token):
+    identity, token_error = read_reset_token(token, "admin")
+    if token_error:
+        return render_template("reset_password.html", mode="admin", error=token_error)
+
+    if request.method == "POST":
+        password = request.form.get("password", "").strip()
+        confirm_password = request.form.get("confirm_password", "").strip()
+
+        if len(password) < 6:
+            return render_template("reset_password.html", mode="admin", error="Password must be at least 6 characters.")
+        if password != confirm_password:
+            return render_template("reset_password.html", mode="admin", error="Passwords do not match.")
+        if not update_admin_password(identity["username"], identity["email"], password):
+            return render_template("reset_password.html", mode="admin", error="Unable to reset admin password right now.")
+
+        return render_template("reset_password.html", mode="admin", success="Admin password updated successfully. You can now log in.")
+
+    return render_template("reset_password.html", mode="admin")
 
 
 @app.route("/sitemap.xml")

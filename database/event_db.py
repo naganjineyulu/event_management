@@ -1,6 +1,9 @@
 import sqlite3
+from pathlib import Path
 
-conn = sqlite3.connect("database/event.db")
+database_path = Path(__file__).resolve().parent / "event.db"
+
+conn = sqlite3.connect(database_path)
 cursor = conn.cursor()
 
 # Users table
@@ -8,8 +11,10 @@ cursor.execute("""
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT,
-    email TEXT UNIQUE,
-    password TEXT
+    email TEXT,
+    password TEXT,
+    mobile TEXT,
+    enrollment TEXT UNIQUE
 )
 """)
 
@@ -49,4 +54,4 @@ CREATE TABLE IF NOT EXISTS registrations (
 conn.commit()
 conn.close()
 
-print("✅ Database and tables created successfully")
+print("Database and tables created successfully")

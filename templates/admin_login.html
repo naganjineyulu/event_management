@@ -15,8 +15,8 @@
     <style>
         .admin-login-container {
             max-width: 420px;
-            margin: 80px auto;
-            padding: 40px 35px;
+            margin: 24px auto 40px;
+            padding: 28px 35px;
             border-radius: 12px;
             background: linear-gradient(135deg, rgba(20, 20, 30, 0.95) 0%, rgba(40, 40, 60, 0.95) 100%);
             border: 2px solid #fbbf24;
@@ -26,7 +26,7 @@
         .admin-login-header {
             text-align: center;
             color: #fff;
-            margin-bottom: 35px;
+            margin-bottom: 24px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -34,13 +34,23 @@
         }
 
         .admin-login-header .lock-icon {
-            font-size: 56px;
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: rgba(251, 191, 36, 0.12);
+            border: 1px solid rgba(251, 191, 36, 0.45);
+            color: #fbbf24;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
             animation: lockPulse 2s infinite;
-            display: inline-block;
         }
 
         .admin-login-header h1 {
-            font-size: 32px;
+            font-size: 30px;
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 3px;
@@ -64,12 +74,21 @@
             display: flex;
             flex-direction: column;
             gap: 16px;
+            align-items: center;
+            margin: 0;
+            padding: 24px;
+            width: 100%;
+            box-sizing: border-box;
+            background: rgba(15, 23, 42, 0.82);
+            border-radius: 14px;
+            backdrop-filter: none;
         }
 
         .form-group {
             display: flex;
             flex-direction: column;
             gap: 8px;
+            width: min(100%, 356px);
         }
 
         .form-group label {
@@ -78,9 +97,13 @@
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 1px;
+            text-align: left;
         }
 
         .admin-login-form input {
+            width: 100%;
+            box-sizing: border-box;
+            margin: 0;
             padding: 14px 16px;
             border: 2px solid #444;
             border-radius: 8px;
@@ -103,6 +126,8 @@
         }
 
         .admin-login-btn {
+            width: min(100%, 356px);
+            margin-top: 10px;
             padding: 14px 16px;
             background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
             color: #000;
@@ -114,7 +139,6 @@
             transition: all 0.3s ease;
             text-transform: uppercase;
             letter-spacing: 1.5px;
-            margin-top: 10px;
             box-shadow: 0 5px 20px rgba(251, 191, 36, 0.3);
         }
 
@@ -129,8 +153,8 @@
 
         .admin-info {
             text-align: center;
-            margin-top: 30px;
-            padding-top: 25px;
+            margin-top: 18px;
+            padding-top: 18px;
             border-top: 1px solid #444;
             color: #cbd5f5;
             font-size: 13px;
@@ -138,7 +162,7 @@
         }
 
         .admin-info p {
-            margin: 8px 0;
+            margin: 5px 0;
         }
 
         .admin-info a {
@@ -184,7 +208,7 @@
 
         .security-badge {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 14px;
             color: #4b5563;
             font-size: 12px;
             letter-spacing: 0.5px;
@@ -198,12 +222,38 @@
         .divider {
             height: 1px;
             background: linear-gradient(90deg, transparent 0%, #444 50%, transparent 100%);
-            margin: 20px 0;
+            margin: 18px 0 0;
+        }
+
+        .forgot-password-link {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .forgot-password-link a {
+            color: #fbbf24;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .forgot-password-link a:hover {
+            color: #f59e0b;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 520px) {
+            .admin-login-container {
+                width: calc(100% - 32px);
+                padding: 24px 18px;
+                box-sizing: border-box;
+            }
         }
     </style>
 </head>
 
-<body class="fade-in">
+<body class="fade-in" data-error="{{ error|default('', true)|e }}">
 
     <!-- ===== NAVIGATION BAR ===== -->
     <div class="navbar">
@@ -216,7 +266,7 @@
     <div class="admin-login-container">
 
         <div class="admin-login-header">
-            <div class="lock-icon">🔒</div>
+            <div class="lock-icon" aria-hidden="true">Lock</div>
             <h1>Admin Portal</h1>
         </div>
 
@@ -246,12 +296,10 @@
                        required>
             </div>
 
-            <button type="submit" class="admin-login-btn">
-                🔓 Login
-            </button>
+            <button type="submit" class="admin-login-btn">Login</button>
 
-            <div style="text-align: center; margin-top: 15px;">
-                <a href="/admin_forgot_password" style="color: #fbbf24; text-decoration: none; font-size: 13px; font-weight: 600; transition: all 0.3s ease;" onmouseover="this.style.color='#f59e0b'; this.style.textDecoration='underline';" onmouseout="this.style.color='#fbbf24'; this.style.textDecoration='none';">Forgot Password?</a>
+            <div class="forgot-password-link">
+                <a href="/admin_forgot_password">Forgot Password?</a>
             </div>
 
         </form>
@@ -261,7 +309,7 @@
 
         <!-- Admin Info -->
         <div class="admin-info">
-            <p>⚠️ <strong>Authorized Personnel Only</strong></p>
+            <p><strong>Authorized Personnel Only</strong></p>
             <p>This is a secure admin portal. Unauthorized access is prohibited.</p>
             <p>Don't have an account? <a href="/admin_register">Register here</a></p>
             <p>Student access? Visit <a href="/login">Student Login</a></p>
@@ -269,7 +317,7 @@
 
         <!-- Security Badge -->
         <div class="security-badge">
-            <span>✓ Secure Login</span> | <span>🔐 Encrypted</span>
+            <span>Secure Login</span> | <span>Encrypted</span>
         </div>
 
     </div>
@@ -310,16 +358,17 @@
 
         function showError(message) {
             const errorMessage = document.getElementById('errorMessage');
-            errorMessage.textContent = '❌ ' + message;
+            errorMessage.textContent = 'Error: ' + message;
             errorMessage.classList.add('show');
         }
 
-        // Show error if login failed
-        {% if error %}
-            document.addEventListener('DOMContentLoaded', function() {
-                showError({{ error|tojson }});
-            });
-        {% endif %}
+        document.addEventListener('DOMContentLoaded', function() {
+            const serverError = document.body.dataset.error;
+
+            if (serverError) {
+                showError(serverError);
+            }
+        });
     </script>
 
 </body>

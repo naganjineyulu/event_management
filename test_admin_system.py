@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+import os
+import tempfile
+
+os.environ["EVENT_MANAGEMENT_DATA_DIR"] = tempfile.mkdtemp(prefix="event_management_test_")
+
 from api.index import app
 
 client = app.test_client()
@@ -45,10 +50,10 @@ print(f'6. Invalid Login: {r.status_code} (Expected: 200 with error message)')
 # Test 7: Test logout
 with client:
     client.post('/admin_login', data={
-        'username': 'admin',
-        'password': 'admin123'
+        'username': 'janesmith',
+        'password': 'password456'
     })
     r = client.get('/admin_logout')
     print(f'7. Admin Logout: {r.status_code} (Expected: 302 redirect)')
 
-print('\n✅ All admin system tests completed!')
+print('\nAll admin system tests completed!')

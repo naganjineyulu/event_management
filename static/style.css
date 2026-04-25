@@ -176,14 +176,40 @@ a:hover {
 
 /* ===== PAYMENT PAGE ===== */
 
+.payment-page {
+    width: min(100% - 32px, 620px);
+    margin: 0 auto 48px;
+}
+
 .payment-box {
     background: rgba(15, 23, 42, 0.95);
-    padding: 25px;
+    padding: 26px;
     border-radius: 14px;
-    width: 350px;
-    margin: auto;
-
+    width: 100%;
+    box-sizing: border-box;
     backdrop-filter: blur(10px);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
+    text-align: left;
+}
+
+.payment-box h3 {
+    margin: 0 0 10px;
+    text-align: center;
+}
+
+.payment-description {
+    color: #cbd5f5;
+    line-height: 1.5;
+    margin: 0 0 14px;
+    text-align: center;
+}
+
+.payment-amount {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #facc15;
+    text-align: center;
 }
 
 .payment-error {
@@ -195,17 +221,108 @@ a:hover {
     border: 1px solid rgba(248, 113, 113, 0.35);
 }
 
-.payment-proof-card {
-    text-align: left;
-    border: 1px solid rgba(250, 204, 21, 0.18);
-    background: linear-gradient(180deg, rgba(30, 41, 59, 0.92), rgba(15, 23, 42, 0.92));
+.payment-divider {
+    margin: 20px 0;
+    border: none;
+    border-top: 1px solid rgba(148, 163, 184, 0.25);
 }
 
-.payment-proof-title {
-    margin: 0 0 8px;
-    font-weight: 700;
+.payment-section {
+    margin: 0;
+}
+
+.payment-section-title {
+    margin: 0 0 12px;
     font-size: 16px;
+    font-weight: 700;
     color: #f8fafc;
+}
+
+.payment-method-list {
+    display: grid;
+    gap: 12px;
+}
+
+.payment-method-card {
+    padding: 16px;
+    border-radius: 12px;
+    background: rgba(30, 41, 59, 0.86);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.payment-method-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.payment-method-logo {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, #5f3dc4, #7c5cdb);
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 22px;
+    flex: 0 0 auto;
+}
+
+.payment-method-title {
+    margin: 0;
+    font-weight: 700;
+    color: #f8fafc;
+}
+
+.payment-method-detail {
+    margin: 5px 0 0;
+    color: #cbd5f5;
+    font-size: 13px;
+}
+
+.payment-qr-box {
+    margin-top: 14px;
+    padding: 16px;
+    border-radius: 10px;
+    background: #ffffff;
+    text-align: center;
+}
+
+.payment-qr-box p {
+    margin: 0 0 10px;
+    color: #475569;
+    font-size: 12px;
+}
+
+.payment-qr-box img {
+    width: min(220px, 100%);
+    height: auto;
+    padding: 8px;
+    border: 4px solid #5f3dc4;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(95, 61, 196, 0.3);
+    box-sizing: border-box;
+}
+
+.payment-form {
+    display: grid;
+    gap: 18px;
+    margin: 18px 0 0;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    backdrop-filter: none;
+}
+
+.payment-proof-card {
+    text-align: left;
+    margin: 0;
+    padding: 18px;
+    border-radius: 12px;
+    border: 1px solid rgba(250, 204, 21, 0.18);
+    background: linear-gradient(180deg, rgba(30, 41, 59, 0.92), rgba(15, 23, 42, 0.92));
 }
 
 .payment-proof-help {
@@ -287,6 +404,14 @@ a:hover {
     color: #94a3b8;
 }
 
+.payment-submit-btn {
+    justify-self: center;
+    min-width: 260px;
+    padding: 13px 20px;
+    font-size: 16px;
+    font-weight: 700;
+}
+
 /* ===== TICKET PAGE ===== */
 
 .ticket {
@@ -317,9 +442,17 @@ a:hover {
 }
 
 @media (max-width: 480px) {
+    .payment-page {
+        width: min(100% - 24px, 620px);
+        margin-bottom: 32px;
+    }
+
     .payment-box {
-        width: calc(100% - 32px);
         padding: 20px 16px;
-        box-sizing: border-box;
+    }
+
+    .payment-submit-btn {
+        width: 100%;
+        min-width: 0;
     }
 }
